@@ -300,6 +300,31 @@ class NewsSummarizer {
     }
   }
 
+  // 顯示頂部狀態條
+  showTopStatusBar(message) {
+    // 移除已存在的狀態條
+    this.hideTopStatusBar();
+
+    const statusBar = document.createElement('div');
+    statusBar.id = 'news-summary-status-bar';
+    statusBar.innerHTML = `
+      <div class="status-content">
+        <div class="status-spinner"></div>
+        <span class="status-text">${message}</span>
+      </div>
+    `;
+
+    document.body.appendChild(statusBar);
+  }
+
+  // 隱藏頂部狀態條
+  hideTopStatusBar() {
+    const existingBar = document.getElementById('news-summary-status-bar');
+    if (existingBar) {
+      existingBar.remove();
+    }
+  }
+
   // 自動生成摘要
   async autoSummarize() {
     if (this.isProcessing) return;
@@ -322,16 +347,17 @@ class NewsSummarizer {
         return;
       }
 
-      // 顯示載入中
-      this.showLoading();
+      // 顯示頂部狀態條
+      this.showTopStatusBar('正在產生新聞摘要...');
 
       const summary = await this.generateSummary(content, title);
 
-      this.hideLoading();
+      // 隱藏狀態條並顯示摘要
+      this.hideTopStatusBar();
       this.createOverlayAndModal(summary, title);
 
     } catch (error) {
-      this.hideLoading();
+      this.hideTopStatusBar();
       this.showError(error.message);
     } finally {
       this.isProcessing = false;
