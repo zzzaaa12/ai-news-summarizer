@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "新聞摘要助手",
+  "version": "1.0",
+  "description": "自動為新聞網站生成AI摘要",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://api.openai.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.news.com/*",
+        "*://*.cnn.com/*",
+        "*://*.bbc.com/*",
+        "*://*.reuters.com/*",
+        "*://*.ap.org/*",
+        "*://*.udn.com/*",
+        "*://*.chinatimes.com/*",
+        "*://*.ltn.com.tw/*",
+        "*://*.ettoday.net/*",
+        "*://*.tvbs.com.tw/*",
+        "*://tw.news.yahoo.com/*",
+        "*://news.yahoo.com/*",
+        "*://hk.news.yahoo.com/*",
+        "*://*.setn.com/*",
+        "*://*.storm.mg/*",
+        "*://*.nownews.com/*",
+        "*://*.newtalk.tw/*",
+        "*://*.ctwant.com/*",
+        "*://*.mirrormedia.mg/*",
+        "*://*.businessweekly.com.tw/*",
+        "*://*.cw.com.tw/*",
+        "*://*.gvm.com.tw/*"
+      ],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "新聞摘要設定"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
