@@ -8,22 +8,22 @@
       padding: 20px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
-    
+
     .header {
       text-align: center;
       margin-bottom: 20px;
     }
-    
+
     .header h2 {
       margin: 0;
       color: #1f2937;
       font-size: 18px;
     }
-    
+
     .form-group {
       margin-bottom: 16px;
     }
-    
+
     label {
       display: block;
       margin-bottom: 6px;
@@ -31,7 +31,7 @@
       color: #374151;
       font-size: 14px;
     }
-    
+
     input[type="password"], input[type="text"], select {
       width: 100%;
       padding: 8px 12px;
@@ -41,13 +41,13 @@
       box-sizing: border-box;
       background-color: white;
     }
-    
+
     input:focus, select:focus {
       outline: none;
       border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
-    
+
     .btn {
       background-color: #3b82f6;
       color: white;
@@ -59,11 +59,11 @@
       width: 100%;
       margin-top: 8px;
     }
-    
+
     .btn:hover {
       background-color: #2563eb;
     }
-    
+
     .status {
       margin-top: 12px;
       padding: 8px 12px;
@@ -71,44 +71,44 @@
       font-size: 13px;
       text-align: center;
     }
-    
+
     .status.success {
       background-color: #d1fae5;
       color: #065f46;
       border: 1px solid #a7f3d0;
     }
-    
+
     .status.error {
       background-color: #fee2e2;
       color: #991b1b;
       border: 1px solid #fca5a5;
     }
-    
+
     .help-text {
       font-size: 12px;
       color: #6b7280;
       margin-top: 4px;
     }
-    
+
     .divider {
       height: 1px;
       background-color: #e5e7eb;
       margin: 20px 0;
     }
-    
+
     .info-section {
       background-color: #f9fafb;
       padding: 12px;
       border-radius: 6px;
       margin-top: 16px;
     }
-    
+
     .info-section h4 {
       margin: 0 0 8px 0;
       font-size: 14px;
       color: #374151;
     }
-    
+
     .info-section p {
       margin: 0;
       font-size: 12px;
@@ -121,13 +121,14 @@
   <div class="header">
     <h2>📰 新聞摘要助手</h2>
   </div>
-  
+
   <div class="form-group">
     <label for="aiService">AI 服務</label>
     <select id="aiService">
       <option value="gemini">Google Gemini (預設)</option>
       <option value="openai">OpenAI GPT</option>
       <option value="xai">xAI Grok</option>
+      <option value="cloudflare">Cloudflare Workers AI</option>
     </select>
   </div>
 
@@ -155,6 +156,22 @@
     </div>
   </div>
 
+  <div class="form-group" id="cloudflareGroup">
+    <label for="cloudflareKey">Cloudflare API Token</label>
+    <input type="password" id="cloudflareKey" placeholder="your-api-token">
+    <div class="help-text">
+      請輸入您的 Cloudflare API Token
+    </div>
+  </div>
+
+  <div class="form-group" id="cloudflareAccountGroup">
+    <label for="cloudflareAccount">Cloudflare Account ID</label>
+    <input type="text" id="cloudflareAccount" placeholder="your-account-id">
+    <div class="help-text">
+      請輸入您的 Cloudflare Account ID
+    </div>
+  </div>
+
   <div class="form-group" id="openaiModelGroup">
     <label for="openaiModel">OpenAI 模型</label>
     <input type="text" id="openaiModel" placeholder="gpt-4o-mini">
@@ -178,13 +195,21 @@
       常用模型：grok-4-0709, grok-3-mini-fast, grok-3-mini, grok-3, grok-3-fast
     </div>
   </div>
-  
+
+  <div class="form-group" id="cloudflareModelGroup">
+    <label for="cloudflareModel">Cloudflare Workers AI 模型</label>
+    <input type="text" id="cloudflareModel" placeholder="@cf/meta/llama-3.1-8b-instruct">
+    <div class="help-text">
+      常用模型：@cf/meta/llama-3.1-8b-instruct, @cf/meta/llama-3-8b-instruct, @cf/mistral/mistral-7b-instruct-v0.1
+    </div>
+  </div>
+
   <button class="btn" id="saveBtn">保存設定</button>
-  
+
   <div id="status" class="status" style="display: none;"></div>
-  
+
   <div class="divider"></div>
-  
+
   <div class="info-section">
     <h4>使用說明</h4>
     <p>
@@ -194,7 +219,7 @@
       4. 點擊右下角按鈕手動生成摘要
     </p>
   </div>
-  
+
   <div class="info-section">
     <h4>支援網站</h4>
     <p>

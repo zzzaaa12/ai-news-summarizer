@@ -9,7 +9,8 @@
   ],
   "host_permissions": [
     "https://api.openai.com/*",
-    "https://api.x.ai/*"
+    "https://api.x.ai/*",
+    "https://api.cloudflare.com/*"
   ],
   "content_scripts": [
     {
@@ -39,8 +40,12 @@
         "*://*.gvm.com.tw/*",
         "*://*.cna.com.tw/*"
       ],
-      "js": ["content.js"],
-      "css": ["styles.css"]
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "styles.css"
+      ]
     }
   ],
   "action": {
