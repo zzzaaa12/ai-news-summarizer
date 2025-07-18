@@ -8,7 +8,8 @@
     "storage"
   ],
   "host_permissions": [
-    "https://api.openai.com/*"
+    "https://api.openai.com/*",
+    "https://api.x.ai/*"
   ],
   "content_scripts": [
     {
@@ -21,6 +22,7 @@
         "*://*.udn.com/*",
         "*://*.chinatimes.com/*",
         "*://*.ltn.com.tw/*",
+        "*://ec.ltn.com.tw/*",
         "*://*.ettoday.net/*",
         "*://*.tvbs.com.tw/*",
         "*://tw.news.yahoo.com/*",
@@ -34,7 +36,8 @@
         "*://*.mirrormedia.mg/*",
         "*://*.businessweekly.com.tw/*",
         "*://*.cw.com.tw/*",
-        "*://*.gvm.com.tw/*"
+        "*://*.gvm.com.tw/*",
+        "*://*.cna.com.tw/*"
       ],
       "js": ["content.js"],
       "css": ["styles.css"]

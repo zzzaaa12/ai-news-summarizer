@@ -8,10 +8,20 @@ class NewsSummarizer {
 
   // 初始化
   async init() {
+    console.log('新聞摘要助手初始化中...', window.location.href);
+    
     // 檢查是否為新聞頁面
-    if (this.isNewsPage()) {
+    const isNews = this.isNewsPage();
+    console.log('是否為新聞頁面:', isNews);
+    
+    if (isNews) {
+      console.log('檢測到新聞頁面，開始初始化功能');
       await this.createSummaryButton();
       await this.autoSummarize();
+    } else {
+      console.log('未檢測到新聞頁面，跳過初始化');
+      // 輸出頁面中存在的元素供調試
+      this.debugPageElements();
     }
   }
 
@@ -20,7 +30,11 @@ class NewsSummarizer {
     const newsIndicators = [
       'article', '.article', '#article',
       '.news-content', '.story-content',
-      '[role="article"]', '.post-content'
+      '[role="article"]', '.post-content',
+      '.text', '.text-content', '.article-text',
+      '.content-text', '.main-content', '.article-body',
+      '.news-text', '.story-text', '.article-detail',
+      '.boxTitle', '.whitecon', '.cont'
     ];
 
     return newsIndicators.some(selector =>
@@ -36,7 +50,16 @@ class NewsSummarizer {
       '.news-content p',
       '.story-content p',
       '.post-content p',
-      '.content p'
+      '.content p',
+      '.text p',
+      '.text-content p',
+      '.article-text p',
+      '.main-content p',
+      '.article-body p',
+      '.whitecon p',
+      '.cont p',
+      '.boxTitle + div p',
+      '.article-detail p'
     ];
 
     let content = '';
@@ -92,6 +115,8 @@ class NewsSummarizer {
 
       if (settings.aiService === 'gemini') {
         return await this.generateGeminiSummary(content, title, settings);
+      } else if (settings.aiService === 'xai') {
+        return await this.generateXAISummary(content, title, settings);
       } else {
         return await this.generateOpenAISummary(content, title, settings);
       }
@@ -205,6 +230,57 @@ class NewsSummarizer {
     return summary;
   }
 
+  // 調用xAI API生成摘要
+  async generateXAISummary(content, title, settings) {
+    if (!settings.xaiApiKey) {
+      throw new Error('請先在擴展設定中配置xAI API密鑰');
+    }
+
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${settings.xaiApiKey}`
+      },
+      body: JSON.stringify({
+        model: settings.xaiModel,
+        messages: [
+          {
+            role: 'system',
+            content: '你是一個專業的新聞摘要助手。請用繁體中文為新聞內容生成條列式的摘要(從數字1開始)，最多500中文字，包含所有要點。'
+          },
+          {
+            role: 'user',
+            content: `請為以下新聞生成摘要：\n標題：${title}\n內容：${content}`
+          }
+        ],
+        max_tokens: 1000,
+        temperature: 0.3
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`xAI API請求失敗: ${response.status} - ${errorData.error?.message || '未知錯誤'}`);
+    }
+
+    const data = await response.json();
+
+    // 確保有獲得摘要內容
+    if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+      throw new Error('xAI API回應格式錯誤或未獲得摘要內容');
+    }
+
+    const summary = data.choices[0].message.content.trim();
+
+    // 檢查摘要是否為空或過短
+    if (!summary || summary.length < 10) {
+      throw new Error('生成的摘要內容過短或為空');
+    }
+
+    return summary;
+  }
+
   // 獲取設定
   async getSettings() {
     return new Promise((resolve) => {
@@ -212,15 +288,19 @@ class NewsSummarizer {
         'aiService',
         'openaiApiKey',
         'geminiApiKey',
+        'xaiApiKey',
         'openaiModel',
-        'geminiModel'
+        'geminiModel',
+        'xaiModel'
       ], (result) => {
         resolve({
           aiService: result.aiService || 'gemini',
           openaiApiKey: result.openaiApiKey,
           geminiApiKey: result.geminiApiKey,
+          xaiApiKey: result.xaiApiKey,
           openaiModel: result.openaiModel || 'gpt-4o-mini',
-          geminiModel: result.geminiModel || 'gemini-2.5-flash-lite-preview-06-17'
+          geminiModel: result.geminiModel || 'gemini-2.5-flash-lite-preview-06-17',
+          xaiModel: result.xaiModel || 'grok-4-0709'
         });
       });
     });
@@ -295,6 +375,8 @@ class NewsSummarizer {
 
     if (settings.aiService === 'openai') {
       return !!settings.openaiApiKey;
+    } else if (settings.aiService === 'xai') {
+      return !!settings.xaiApiKey;
     } else {
       return !!settings.geminiApiKey;
     }
@@ -423,6 +505,55 @@ class NewsSummarizer {
 
     // 將按鈕添加到頁面右下角
     document.body.appendChild(button);
+  }
+
+  // 調試頁面元素
+  debugPageElements() {
+    console.log('=== 頁面調試信息 ===');
+    console.log('頁面標題:', document.title);
+    console.log('頁面URL:', window.location.href);
+    
+    // 檢查常見的新聞頁面元素
+    const elementsToCheck = [
+      'article', '.article', '#article',
+      '.news-content', '.story-content', '[role="article"]', '.post-content',
+      '.text', '.text-content', '.article-text', '.content-text', 
+      '.main-content', '.article-body', '.news-text', '.story-text', 
+      '.article-detail', '.boxTitle', '.whitecon', '.cont',
+      'h1', 'h2', '.title', '.headline'
+    ];
+    
+    console.log('頁面中存在的元素:');
+    elementsToCheck.forEach(selector => {
+      const element = document.querySelector(selector);
+      if (element) {
+        console.log(`✓ ${selector}:`, element.textContent?.substring(0, 100) + '...');
+      }
+    });
+    
+    // 檢查所有段落
+    const paragraphs = document.querySelectorAll('p');
+    console.log(`頁面共有 ${paragraphs.length} 個段落`);
+    
+    if (paragraphs.length > 0) {
+      console.log('前3個段落內容:');
+      Array.from(paragraphs).slice(0, 3).forEach((p, index) => {
+        const text = p.textContent?.trim();
+        if (text && text.length > 20) {
+          console.log(`段落 ${index + 1}:`, text.substring(0, 150) + '...');
+        }
+      });
+    }
+    
+    // 檢查頁面的主要容器
+    const containers = document.querySelectorAll('div[class*="content"], div[class*="article"], div[class*="news"], div[class*="story"]');
+    console.log(`找到 ${containers.length} 個可能的內容容器`);
+    
+    containers.forEach((container, index) => {
+      if (index < 5) { // 只顯示前5個
+        console.log(`容器 ${index + 1} (${container.className}):`, container.textContent?.substring(0, 100) + '...');
+      }
+    });
   }
 }
 
