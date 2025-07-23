@@ -10,6 +10,13 @@ class NewsSummarizer {
   async init() {
     console.log('新聞摘要助手初始化中...', window.location.href);
 
+    // 檢查是否為 UDN 首頁
+    if (this.isUdnHomePage()) {
+      console.log('檢測到 UDN 首頁，初始化新聞列表功能');
+      await this.initUdnHomePage();
+      return;
+    }
+
     // 檢查是否為新聞頁面
     const isNews = this.isNewsPage();
     console.log('是否為新聞頁面:', isNews);
@@ -576,6 +583,273 @@ class NewsSummarizer {
 
     // 將按鈕添加到頁面右下角
     document.body.appendChild(button);
+  }
+
+  // 檢查是否為 UDN 首頁
+  isUdnHomePage() {
+    const url = window.location.href;
+    // 只匹配真正的首頁 URL
+    return url.includes('udn.com/news/index') ||
+      (url.includes('udn.com') && url.endsWith('/')) ||
+      (url.includes('udn.com') && url.match(/\/news\/?$/));
+  }
+
+  // 初始化 UDN 首頁功能
+  async initUdnHomePage() {
+    console.log('初始化 UDN 首頁新聞列表功能');
+
+    // 等待頁面完全載入
+    await this.waitForPageLoad();
+
+    // 創建新聞摘要頁面按鈕
+    this.createUdnSummaryButton();
+
+    // 直接顯示摘要
+    await this.generateUdnHomeSummary();
+
+    // 監聽頁面變化（動態載入內容）
+    this.observePageChanges();
+  }
+
+  // 等待頁面載入
+  waitForPageLoad() {
+    return new Promise((resolve) => {
+      if (document.readyState === 'complete') {
+        setTimeout(resolve, 1000); // 額外等待1秒確保動態內容載入
+      } else {
+        window.addEventListener('load', () => {
+          setTimeout(resolve, 1000);
+        });
+      }
+    });
+  }
+
+  // 創建 UDN 摘要按鈕
+  createUdnSummaryButton() {
+    const button = document.createElement('button');
+    button.id = 'udn-news-summary-btn';
+    button.innerHTML = '📰 生成首頁摘要';
+    button.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: all 0.3s ease;
+    `;
+
+    button.addEventListener('click', () => this.generateUdnHomeSummary());
+    button.addEventListener('mouseenter', () => {
+      button.style.background = '#1d4ed8';
+      button.style.transform = 'translateY(-2px)';
+    });
+    button.addEventListener('mouseleave', () => {
+      button.style.background = '#2563eb';
+      button.style.transform = 'translateY(0)';
+    });
+
+    document.body.appendChild(button);
+  }
+
+  // 擷取 UDN 首頁新聞列表
+  extractUdnNewsList() {
+    const newsList = [];
+
+    // 尋找新聞列表項目
+    const newsItems = document.querySelectorAll('.story-list__news, .story-list, .news-list__item, .story-item');
+
+    console.log(`找到 ${newsItems.length} 個新聞項目`);
+
+    newsItems.forEach((item, index) => {
+      try {
+        // 擷取標題和連結
+        const titleLink = item.querySelector('h3 a, .story-list__text h3 a, .title a, a[title]');
+        const title = titleLink ? titleLink.getAttribute('title') || titleLink.textContent.trim() : '';
+        const link = titleLink ? titleLink.href : '';
+
+        // 擷取摘要文字
+        const summaryElement = item.querySelector('p, .story-list__text p, .summary, .excerpt');
+        const summary = summaryElement ? summaryElement.textContent.trim() : '';
+
+        // 擷取時間
+        const timeElement = item.querySelector('time, .story-list__time, .time, .date');
+        const time = timeElement ? timeElement.textContent.trim() : '';
+
+        // 擷取圖片
+        const imgElement = item.querySelector('img, .story-list__image img');
+        const image = imgElement ? imgElement.src : '';
+
+        if (title && link) {
+          newsList.push({
+            title,
+            link,
+            summary,
+            time,
+            image,
+            index: index + 1
+          });
+        }
+      } catch (error) {
+        console.error(`處理新聞項目 ${index} 時發生錯誤:`, error);
+      }
+    });
+
+    // 如果沒找到，嘗試其他選擇器
+    if (newsList.length === 0) {
+      console.log('使用備用選擇器搜尋新聞');
+      const alternativeItems = document.querySelectorAll('article, .news-item, .story, [class*="news"], [class*="story"]');
+
+      alternativeItems.forEach((item, index) => {
+        if (index >= 20) return; // 限制數量
+
+        const titleElement = item.querySelector('h1, h2, h3, h4, .title, [class*="title"]');
+        const linkElement = item.querySelector('a[href*="/story/"], a[href*="/news/"]');
+
+        if (titleElement && linkElement) {
+          const title = titleElement.textContent.trim();
+          const link = linkElement.href;
+
+          if (title && link && title.length > 10) {
+            newsList.push({
+              title,
+              link,
+              summary: '',
+              time: '',
+              image: '',
+              index: newsList.length + 1
+            });
+          }
+        }
+      });
+    }
+
+    console.log(`成功擷取 ${newsList.length} 則新聞`);
+    return newsList.slice(0, 50); // 限制最多15則新聞
+  }
+
+  // 生成 UDN 首頁摘要
+  async generateUdnHomeSummary() {
+    if (this.isProcessing) return;
+
+    try {
+      this.isProcessing = true;
+
+      // 顯示載入狀態
+      this.showTopStatusBar('正在擷取首頁新聞列表...');
+
+      // 擷取新聞列表
+      const newsList = this.extractUdnNewsList();
+
+      if (newsList.length === 0) {
+        throw new Error('未找到新聞列表，請確認頁面已完全載入');
+      }
+
+      // 更新狀態
+      this.showTopStatusBar('正在生成新聞摘要頁面...');
+
+      // 生成摘要頁面
+      this.createUdnSummaryPage(newsList);
+
+      this.hideTopStatusBar();
+
+    } catch (error) {
+      this.hideTopStatusBar();
+      this.showError(error.message);
+    } finally {
+      this.isProcessing = false;
+    }
+  }
+
+  // 創建 UDN 摘要頁面
+  createUdnSummaryPage(newsList) {
+    // 生成新聞列表 HTML
+    const newsListHtml = newsList.map(news => `
+      <div class="news-item">
+        <div class="news-content">
+          <h4 class="news-title">
+            <a href="${news.link}" target="_blank" rel="noopener">${news.title}</a>
+          </h4>
+          ${news.summary ? `<p class="news-summary">${news.summary}</p>` : ''}
+          ${news.time ? `<div class="news-time">${news.time}</div>` : ''}
+        </div>
+        ${news.image ? `<div class="news-image"><img src="${news.image}" alt="" loading="lazy"></div>` : ''}
+      </div>
+    `).join('');
+
+    // 創建覆蓋層
+    this.overlay = document.createElement('div');
+    this.overlay.id = 'udn-summary-overlay';
+    this.overlay.innerHTML = `
+      <div class="udn-summary-modal">
+        <div class="summary-header">
+          <h3>📰 UDN 首頁新聞摘要</h3>
+          <div class="header-actions">
+            <button class="refresh-btn" title="重新整理">🔄</button>
+            <button class="close-btn">&times;</button>
+          </div>
+        </div>
+        <div class="summary-stats">
+          <span>共找到 ${newsList.length} 則新聞</span>
+          <span>更新時間: ${new Date().toLocaleString('zh-TW')}</span>
+        </div>
+        <div class="news-list">
+          ${newsListHtml}
+        </div>
+        <div class="summary-footer">
+          <small>由新聞摘要助手自動擷取整理</small>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(this.overlay);
+
+    // 添加事件監聽
+    const closeBtn = this.overlay.querySelector('.close-btn');
+    const refreshBtn = this.overlay.querySelector('.refresh-btn');
+
+    closeBtn.addEventListener('click', () => this.closeSummary());
+    refreshBtn.addEventListener('click', () => {
+      this.closeSummary();
+      this.generateUdnHomeSummary();
+    });
+
+    this.overlay.addEventListener('click', (e) => {
+      if (e.target === this.overlay) {
+        this.closeSummary();
+      }
+    });
+
+    // ESC鍵關閉
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.overlay) {
+        this.closeSummary();
+      }
+    });
+  }
+
+  // 監聽頁面變化
+  observePageChanges() {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+          // 頁面內容有變化，可能是動態載入了新內容
+          console.log('檢測到頁面內容變化');
+        }
+      });
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
   }
 
   // 調試頁面元素
