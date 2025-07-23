@@ -38,7 +38,8 @@
         "*://*.businessweekly.com.tw/*",
         "*://*.cw.com.tw/*",
         "*://*.gvm.com.tw/*",
-        "*://*.cna.com.tw/*"
+        "*://*.cna.com.tw/*",
+        "*://news.cnyes.com/*"
       ],
       "js": [
         "content.js"
