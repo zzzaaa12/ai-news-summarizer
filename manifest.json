@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "新聞摘要助手",
+  "name": "AI News Summarizer",
   "version": "1.0",
   "description": "自動為新聞網站生成AI摘要",
   "permissions": [
