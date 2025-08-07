@@ -10,8 +10,12 @@ document.addEventListener('DOMContentLoaded', function() {
   const geminiModelInput = document.getElementById('geminiModel');
   const xaiModelInput = document.getElementById('xaiModel');
   const cloudflareModelInput = document.getElementById('cloudflareModel');
+  const iconOnlyModeCheckbox = document.getElementById('iconOnlyMode');
+  const iconPositionSelect = document.getElementById('iconPosition');
   const saveBtn = document.getElementById('saveBtn');
   const statusDiv = document.getElementById('status');
+
+  const iconPositionGroup = document.getElementById('iconPositionGroup');
 
   const openaiGroup = document.getElementById('openaiGroup');
   const geminiGroup = document.getElementById('geminiGroup');
@@ -34,7 +38,9 @@ document.addEventListener('DOMContentLoaded', function() {
     'openaiModel',
     'geminiModel',
     'xaiModel',
-    'cloudflareModel'
+    'cloudflareModel',
+    'iconOnlyMode',
+    'iconPosition'
   ], function(result) {
     // 設定AI服務選擇
     aiServiceSelect.value = result.aiService || 'gemini';
@@ -62,12 +68,19 @@ document.addEventListener('DOMContentLoaded', function() {
     xaiModelInput.value = result.xaiModel || 'grok-4-0709';
     cloudflareModelInput.value = result.cloudflareModel || '@cf/meta/llama-3.1-8b-instruct';
 
+    // 設定圖示模式
+    iconOnlyModeCheckbox.checked = result.iconOnlyMode || false;
+    iconPositionSelect.value = result.iconPosition || 'bottom-right';
+
     // 更新UI顯示
     updateUIVisibility();
   });
 
   // AI服務選擇變更時更新UI
   aiServiceSelect.addEventListener('change', updateUIVisibility);
+
+  // 圖示模式變更時更新UI
+  iconOnlyModeCheckbox.addEventListener('change', updateUIVisibility);
 
   function updateUIVisibility() {
     const selectedService = aiServiceSelect.value;
@@ -94,6 +107,13 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       geminiGroup.style.display = 'block';
       geminiModelGroup.style.display = 'block';
+    }
+
+    // 顯示或隱藏圖示位置選項
+    if (iconOnlyModeCheckbox.checked) {
+      iconPositionGroup.style.display = 'block';
+    } else {
+      iconPositionGroup.style.display = 'none';
     }
   }
 
@@ -164,7 +184,9 @@ document.addEventListener('DOMContentLoaded', function() {
       openaiModel: openaiModel,
       geminiModel: geminiModel,
       xaiModel: xaiModel,
-      cloudflareModel: cloudflareModel
+      cloudflareModel: cloudflareModel,
+      iconOnlyMode: iconOnlyModeCheckbox.checked,
+      iconPosition: iconPositionSelect.value
     }, function() {
       if (chrome.runtime.lastError) {
         showStatus('保存失敗: ' + chrome.runtime.lastError.message, 'error');

@@ -23,7 +23,6 @@ class NewsSummarizer {
 
     if (isNews) {
       console.log('檢測到新聞頁面，開始初始化功能');
-      await this.createSummaryButton();
       await this.autoSummarize();
     } else {
       console.log('未檢測到新聞頁面，跳過初始化');
@@ -364,7 +363,9 @@ class NewsSummarizer {
         'openaiModel',
         'geminiModel',
         'xaiModel',
-        'cloudflareModel'
+        'cloudflareModel',
+        'iconOnlyMode',
+        'iconPosition'
       ], (result) => {
         resolve({
           aiService: result.aiService || 'gemini',
@@ -376,7 +377,9 @@ class NewsSummarizer {
           openaiModel: result.openaiModel || 'gpt-4o-mini',
           geminiModel: result.geminiModel || 'gemini-2.5-flash-lite-preview-06-17',
           xaiModel: result.xaiModel || 'grok-4-0709',
-          cloudflareModel: result.cloudflareModel || '@cf/meta/llama-3.1-8b-instruct'
+          cloudflareModel: result.cloudflareModel || '@cf/meta/llama-3.1-8b-instruct',
+          iconOnlyMode: result.iconOnlyMode || false,
+          iconPosition: result.iconPosition || 'bottom-right'
         });
       });
     });
@@ -498,6 +501,7 @@ class NewsSummarizer {
 
     try {
       this.isProcessing = true;
+      const settings = await this.getSettings();
 
       const content = this.extractNewsContent();
       const title = this.getNewsTitle();
@@ -507,14 +511,20 @@ class NewsSummarizer {
         return;
       }
 
-      // 顯示頂部狀態條
-      this.showTopStatusBar('正在產生新聞摘要...');
-
-      const summary = await this.generateSummary(content, title);
-
-      // 隱藏狀態條並顯示摘要
-      this.hideTopStatusBar();
-      this.createOverlayAndModal(summary, title);
+      // 檢查是否為圖示模式
+      if (settings.iconOnlyMode) {
+        // 圖示模式：先生成摘要，然後顯示圖示
+        this.showTopStatusBar('正在產生新聞摘要...');
+        const summary = await this.generateSummary(content, title);
+        this.hideTopStatusBar();
+        this.showSummaryIconWithContent(summary, title);
+      } else {
+        // 正常模式：直接生成並顯示摘要
+        this.showTopStatusBar('正在產生新聞摘要...');
+        const summary = await this.generateSummary(content, title);
+        this.hideTopStatusBar();
+        this.createOverlayAndModal(summary, title);
+      }
 
     } catch (error) {
       this.hideTopStatusBar();
@@ -574,16 +584,31 @@ class NewsSummarizer {
     });
   }
 
-  // 創建摘要按鈕
-  async createSummaryButton() {
-    const button = document.createElement('button');
-    button.id = 'news-summary-btn';
-    button.innerHTML = '📰 生成摘要';
-    button.addEventListener('click', () => this.autoSummarize());
+  // 顯示摘要圖示（摘要已生成）
+  async showSummaryIconWithContent(summary, title) {
+    // 移除已存在的圖示
+    const existingIcon = document.getElementById('summary-icon');
+    if (existingIcon) {
+      existingIcon.remove();
+    }
 
-    // 將按鈕添加到頁面右下角
-    document.body.appendChild(button);
+    const settings = await this.getSettings();
+    const icon = document.createElement('div');
+    icon.id = 'summary-icon';
+    icon.className = `summary-icon-${settings.iconPosition}`;
+    icon.innerHTML = '📰';
+    icon.title = '點擊查看新聞摘要';
+
+    // 點擊直接顯示已生成的摘要
+    icon.addEventListener('click', () => {
+      this.createOverlayAndModal(summary, title);
+      icon.remove();
+    });
+
+    document.body.appendChild(icon);
   }
+
+
 
   // 檢查是否為 UDN 首頁
   isUdnHomePage() {
@@ -600,9 +625,6 @@ class NewsSummarizer {
 
     // 等待頁面完全載入
     await this.waitForPageLoad();
-
-    // 創建新聞摘要頁面按鈕
-    this.createUdnSummaryButton();
 
     // 直接顯示摘要
     await this.generateUdnHomeSummary();
@@ -624,40 +646,38 @@ class NewsSummarizer {
     });
   }
 
-  // 創建 UDN 摘要按鈕
-  createUdnSummaryButton() {
-    const button = document.createElement('button');
-    button.id = 'udn-news-summary-btn';
-    button.innerHTML = '📰 生成首頁摘要';
-    button.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 10000;
-      background: #2563eb;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      transition: all 0.3s ease;
-    `;
+  // 顯示UDN首頁摘要圖示（新聞列表已準備好）
+  async showUdnSummaryIconWithContent(newsList) {
+    // 移除已存在的圖示
+    const existingIcon = document.getElementById('udn-summary-icon');
+    if (existingIcon) {
+      existingIcon.remove();
+    }
 
-    button.addEventListener('click', () => this.generateUdnHomeSummary());
-    button.addEventListener('mouseenter', () => {
-      button.style.background = '#1d4ed8';
-      button.style.transform = 'translateY(-2px)';
-    });
-    button.addEventListener('mouseleave', () => {
-      button.style.background = '#2563eb';
-      button.style.transform = 'translateY(0)';
+    const settings = await this.getSettings();
+    const icon = document.createElement('div');
+    icon.id = 'udn-summary-icon';
+    icon.className = `summary-icon-${settings.iconPosition}`;
+    icon.innerHTML = '📰';
+    icon.title = `點擊查看首頁新聞摘要 (${newsList.length}則)`;
+
+    // 添加新聞數量徽章
+    if (newsList.length > 0) {
+      const badge = document.createElement('div');
+      badge.className = 'icon-badge';
+      badge.textContent = newsList.length > 99 ? '99+' : newsList.length;
+      icon.appendChild(badge);
+    }
+
+    // 點擊直接顯示已準備好的新聞列表
+    icon.addEventListener('click', () => {
+      this.createUdnSummaryPage(newsList);
     });
 
-    document.body.appendChild(button);
+    document.body.appendChild(icon);
   }
+
+
 
   // 擷取 UDN 首頁新聞列表
   extractUdnNewsList() {
@@ -741,6 +761,7 @@ class NewsSummarizer {
 
     try {
       this.isProcessing = true;
+      const settings = await this.getSettings();
 
       // 顯示載入狀態
       this.showTopStatusBar('正在擷取首頁新聞列表...');
@@ -752,13 +773,16 @@ class NewsSummarizer {
         throw new Error('未找到新聞列表，請確認頁面已完全載入');
       }
 
-      // 更新狀態
-      this.showTopStatusBar('正在生成新聞摘要頁面...');
-
-      // 生成摘要頁面
-      this.createUdnSummaryPage(newsList);
-
       this.hideTopStatusBar();
+
+      // 檢查是否為圖示模式
+      if (settings.iconOnlyMode) {
+        // 圖示模式：直接顯示圖示（新聞列表已準備好）
+        this.showUdnSummaryIconWithContent(newsList);
+      } else {
+        // 正常模式：直接顯示摘要頁面
+        this.createUdnSummaryPage(newsList);
+      }
 
     } catch (error) {
       this.hideTopStatusBar();

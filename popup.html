@@ -204,6 +204,36 @@
     </div>
   </div>
 
+  <div class="divider"></div>
+
+  <div class="form-group">
+    <label style="display: flex; align-items: center; cursor: pointer;">
+      <input type="checkbox" id="iconOnlyMode" style="margin-right: 8px;">
+      僅顯示摘要圖示
+    </label>
+    <div class="help-text">
+      啟用後，摘要將以圖示形式顯示，點擊後展開完整內容
+    </div>
+  </div>
+
+  <div class="form-group" id="iconPositionGroup">
+    <label for="iconPosition">圖示位置</label>
+    <select id="iconPosition">
+      <option value="top-left">左上角</option>
+      <option value="middle-left">左側中央</option>
+      <option value="bottom-left">左下角</option>
+      <option value="top-center">上方中央</option>
+      <option value="middle-center">正中央</option>
+      <option value="bottom-center">下方中央</option>
+      <option value="top-right">右上角</option>
+      <option value="middle-right">右側中央</option>
+      <option value="bottom-right" selected>右下角</option>
+    </select>
+    <div class="help-text">
+      選擇摘要圖示在頁面上的顯示位置
+    </div>
+  </div>
+
   <button class="btn" id="saveBtn">保存設定</button>
 
   <div id="status" class="status" style="display: none;"></div>

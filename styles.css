@@ -154,29 +154,7 @@
   background-color: #2563eb;
 }
 
-/* 摘要按鈕 */
-#news-summary-btn {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-  z-index: 9999;
-  transition: all 0.3s ease;
-}
 
-#news-summary-btn:hover {
-  background-color: #2563eb;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
-}
 
 /* 響應式設計 */
 @media (max-width: 768px) {
@@ -197,12 +175,7 @@
     font-size: 15px;
   }
 
-  #news-summary-btn {
-    bottom: 15px;
-    right: 15px;
-    padding: 10px 16px;
-    font-size: 13px;
-  }
+
 }
 
 /* 頂部
@@ -1020,7 +993,7 @@ UDN 首頁摘要專用樣式 */
 }
 
 .news-title a:hover {
-  color: #3b82f6;
+  color: #3b8200;
   text-decoration: underline;
 }
 
@@ -1077,30 +1050,7 @@ UDN 首頁摘要專用樣式 */
   font-size: 13px;
 }
 
-/* UDN 首頁按鈕樣式 */
-#udn-news-summary-btn {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-  z-index: 10000;
-  transition: all 0.3s ease;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
 
-#udn-news-summary-btn:hover {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
-}
 
 /* 滾動條美化 */
 .news-list::-webkit-scrollbar {
@@ -1168,12 +1118,7 @@ UDN 首頁摘要專用樣式 */
     order: -1;
   }
 
-  #udn-news-summary-btn {
-    top: 10px;
-    right: 10px;
-    padding: 10px 16px;
-    font-size: 13px;
-  }
+
 
   .udn-summary-modal .summary-footer {
     padding: 12px 20px;
@@ -1242,4 +1187,293 @@ UDN 首頁摘要專用樣式 */
   line-height: 1.5;
   max-width: 300px;
   margin: 0 auto;
+}
+
+/* 摘要圖示基本樣式 */
+#summary-icon,
+#udn-summary-icon {
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  z-index: 9999;
+  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  animation: iconPulse 2s infinite;
+}
+
+/* 九種位置樣式 */
+.summary-icon-top-left {
+  top: 20px;
+  left: 20px;
+}
+
+.summary-icon-top-center {
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.summary-icon-top-right {
+  top: 20px;
+  right: 20px;
+}
+
+.summary-icon-middle-left {
+  top: 50%;
+  left: 20px;
+  transform: translateY(-50%);
+}
+
+.summary-icon-middle-center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.summary-icon-middle-right {
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+}
+
+.summary-icon-bottom-left {
+  bottom: 20px;
+  left: 20px;
+}
+
+.summary-icon-bottom-center {
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.summary-icon-bottom-right {
+  bottom: 20px;
+  right: 20px;
+}
+
+#summary-icon:hover,
+#udn-summary-icon:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+}
+
+/* 不同位置的hover效果 */
+.summary-icon-top-left:hover,
+.summary-icon-top-right:hover,
+.summary-icon-bottom-left:hover,
+.summary-icon-bottom-right:hover {
+  transform: scale(1.1);
+}
+
+.summary-icon-top-center:hover {
+  transform: translateX(-50%) scale(1.1);
+}
+
+.summary-icon-middle-left:hover,
+.summary-icon-middle-right:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
+.summary-icon-middle-center:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.summary-icon-bottom-center:hover {
+  transform: translateX(-50%) scale(1.1);
+}
+
+#summary-icon:active,
+#udn-summary-icon:active {
+  /* active效果由位置類別處理 */
+}
+
+/* 不同位置的active效果 */
+.summary-icon-top-left:active,
+.summary-icon-top-right:active,
+.summary-icon-bottom-left:active,
+.summary-icon-bottom-right:active {
+  transform: scale(1.05);
+}
+
+.summary-icon-top-center:active {
+  transform: translateX(-50%) scale(1.05);
+}
+
+.summary-icon-middle-left:active,
+.summary-icon-middle-right:active {
+  transform: translateY(-50%) scale(1.05);
+}
+
+.summary-icon-middle-center:active {
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+.summary-icon-bottom-center:active {
+  transform: translateX(-50%) scale(1.05);
+}
+
+/* 圖示脈衝動畫 */
+@keyframes iconPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.6), 0 0 0 10px rgba(59, 130, 246, 0.1);
+  }
+}
+
+/* 載入狀態的圖示 */
+#summary-icon.loading,
+#udn-summary-icon.loading {
+  animation: iconSpin 1s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes iconSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 錯誤狀態的圖示 */
+#summary-icon.error,
+#udn-summary-icon.error {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  animation: iconShake 0.5s ease-in-out;
+}
+
+@keyframes iconShake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  #summary-icon,
+  #udn-summary-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  /* 手機版位置調整 */
+  .summary-icon-top-left,
+  .summary-icon-middle-left,
+  .summary-icon-bottom-left {
+    left: 15px;
+  }
+
+  .summary-icon-top-right,
+  .summary-icon-middle-right,
+  .summary-icon-bottom-right {
+    right: 15px;
+  }
+
+  .summary-icon-top-left,
+  .summary-icon-top-center,
+  .summary-icon-top-right {
+    top: 15px;
+  }
+
+  .summary-icon-bottom-left,
+  .summary-icon-bottom-center,
+  .summary-icon-bottom-right {
+    bottom: 15px;
+  }
+}
+
+/* 圖示提示文字 */
+.icon-tooltip {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+#summary-icon:hover .icon-tooltip,
+#udn-summary-icon:hover .icon-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 圖示計數器（用於UDN首頁顯示新聞數量） */
+.icon-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  animation: badgePulse 2s infinite;
+}
+
+@keyframes badgePulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* 修復 line-clamp 兼容性問題 */
+.news-summary {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #64748b;
+  margin: 8px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
